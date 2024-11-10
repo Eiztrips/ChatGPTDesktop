@@ -1,0 +1,35 @@
+{
+  "name": "desktopchatgpt",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "pack": "electron-builder --dir"
+  },
+  "build": {
+    "publish": {
+      "provider": "github",
+      "owner": "Eiztrips",
+      "repo": "CHATGPTDESKTOP"
+    },
+    "appId": "com.example.app",
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": ["AppImage", "deb", "tar.gz"]
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  }
+}

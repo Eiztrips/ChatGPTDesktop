@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enter URL</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background-color: #f4f4f4;
+    }
+
+    .header {
+      background-color: #0078d4;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 20px;
+    }
+
+    .container {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+
+    button {
+      padding: 10px;
+      background-color: #0078d4;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #005a8e;
+    }
+
+    .url-list {
+      margin-top: 20px;
+      padding: 0;
+      list-style-type: none;
+    }
+
+    .url-list li {
+      background-color: #ffffff;
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .url-list button {
+      background-color: #e74c3c;
+    }
+
+    .url-list button:hover {
+      background-color: #c0392b;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #0078d4;
+      color: white;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    Enter the URL
+  </div>
+
+  <div class="container">
+    <label for="urlSelect">Select a predefined URL</label>
+    <select id="urlSelect" aria-label="Predefined URL selection">
+      <option disabled selected>Select a URL</option>
+      <option value="https://chat.openai.com">ChatGPT</option>
+      <option value="https://github.com">GitHub</option>
+      <option value="https://music.yandex.ru">Yandex Music</option>
+    </select>
+
+    <label for="urlInput">Or enter a custom URL</label>
+    <input type="text" id="urlInput" placeholder="Enter URL..." />
+
+    <button id="openButton">Open URL</button>
+
+    <ul id="urlList" class="url-list">
+    </ul>
+  </div>
+
+  <div class="footer">
+    <p>&copy; 2024 URL Manager</p>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    ipcRenderer.invoke('get-input-url').then(urls => {
+      const select = document.getElementById('urlSelect');
+      urls.forEach(url => {
+        const option = document.createElement('option');
+        option.value = url;
+        option.innerText = url;
+        select.appendChild(option);
+      });
+    });
+
+    function addPinnedUrl(url) {
+      const urlList = document.getElementById('urlList');
+      const listItem = document.createElement('li');
+      listItem.textContent = url;
+
+      const removeButton = document.createElement('button');
+      removeButton.textContent = 'Delete';
+      removeButton.onclick = () => removeUrl(url, listItem);
+      
+      listItem.appendChild(removeButton);
+      urlList.appendChild(listItem);
+    }
+
+    function removeUrl(url, listItem) {
+      ipcRenderer.invoke('remove-url', url);
+      listItem.remove();
+    }
+
+    document.getElementById('openButton').onclick = () => {
+      let url = document.getElementById('urlInput').value || document.getElementById('urlSelect').value;
+      
+      if (url) {
+        ipcRenderer.invoke('save-url', url);
+        
+        ipcRenderer.send('open-main-window', url);
+
+        addPinnedUrl(url);
+      } else {
+        alert("Please enter or select a valid URL.");
+      }
+    };
+  </script>
+</body>
+</html>
